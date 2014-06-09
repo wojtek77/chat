@@ -3,7 +3,7 @@
 function loginForm() {
     echo'
 	<div id="loginform">
-	<form action="index.php" method="post">
+	<form action="" method="post">
 		<p>Please enter your name to continue:</p>
 		<label for="name">Name:</label>
 		<input type="text" name="name" id="name" />
@@ -13,19 +13,19 @@ function loginForm() {
 	';
 }
 
+function getSetup($key = null) {
+    $arr = parse_ini_file('setup.ini');
+    return isset($key) ? $arr[$key] : $arr;
+}
+
+
 //-------------------------
 
 session_start();
 
 if (isset($_GET['logout'])) {
-
-    //Simple exit message
-    $fp = fopen("log.html", 'a');
-    fwrite($fp, "<div class='msgln'><i>User " . $_SESSION['name'] . " has left the chat session.</i><br></div>");
-    fclose($fp);
-
     session_destroy();
-    header("Location: index.php"); //Redirect the user
+    header("Location: ./"); //Redirect the user
 }
 
 if (isset($_POST['enter'])) {
@@ -55,17 +55,10 @@ if (isset($_POST['enter'])) {
                 <div style="clear:both"></div>
             </div>	
             <div id="chatbox"><?php
-    if (file_exists("log.html") && filesize("log.html") > 0) {
-        $handle = fopen("log.html", "r");
-        $contents = fread($handle, filesize("log.html"));
-        fclose($handle);
-
-        echo $contents;
-    }
         ?></div>
 
             <form name="message" action="">
-                <input name="usermsg" type="text" id="usermsg" size="63" />
+                <input name="usermsg" type="text" id="usermsg" size="63" autocomplete="off" />
                 <input name="submitmsg" type="submit"  id="submitmsg" value="Send" />
             </form>
         </div>
@@ -73,11 +66,24 @@ if (isset($_POST['enter'])) {
         <script type="text/javascript">
             // jQuery Document
             $(document).ready(function() {
+                var id;
                 //If user submits the form
                 $("#submitmsg").click(function() {
                     var clientmsg = $("#usermsg").val();
-                    $.post("post.php", {text: clientmsg});
                     $("#usermsg").attr("value", "");
+                    $.ajax({
+                        type: 'POST',
+                        url: 'post.php',
+                        data: {text: clientmsg},
+                        cache: false,
+                        async: false,
+                        success: function(data) {
+                            loadLog();
+                        },
+                        error: function(request, status, error) {
+                            $("#usermsg").attr("value", clientmsg);
+                        },
+                    });
                     return false;
                 });
 
@@ -85,10 +91,25 @@ if (isset($_POST['enter'])) {
                 function loadLog() {
                     var oldscrollHeight = $("#chatbox").attr("scrollHeight") - 20;
                     $.ajax({
-                        url: "log.html",
+                        type: 'POST',
+                        url: 'server.php',
+                        data: {id: id},
+                        dataType: 'json',
                         cache: false,
-                        success: function(html) {
-                            $("#chatbox").html(html); //Insert chat log into the #chatbox div				
+                        async: false,
+                        success: function(data) {
+                            id = data.id;
+                            var html = '';
+                            var date;
+                            for (var k in data.data.reverse()) {
+                                date = new Date(parseInt(data.data[k][0])*1000);
+                                date = date.toLocaleTimeString();
+                                date = date.replace(/([\d]+\D+[\d]{2})\D+[\d]{2}(.*)/, '$1$2');
+                                html = html
+                                        +"<div class='msgln'>("+date+") <b>"
+                                        +data.data[k][1]+"</b>: "+data.data[k][2]+"<br></div>";
+                            }
+                            $("#chatbox").append(html); //Insert chat messages into the #chatbox div
                             var newscrollHeight = $("#chatbox").attr("scrollHeight") - 20;
                             if (newscrollHeight > oldscrollHeight) {
                                 $("#chatbox").animate({scrollTop: newscrollHeight}, 'normal'); //Autoscroll to bottom of div
@@ -96,7 +117,8 @@ if (isset($_POST['enter'])) {
                         },
                     });
                 }
-                setInterval(loadLog, 2500);	//Reload file every 2.5 seconds
+                loadLog();
+                setInterval(loadLog, <?php echo getSetup('interval') ?>);	//Reload file every 2.5 seconds
 
                 //If user wants to end session
                 $("#exit").click(function() {
