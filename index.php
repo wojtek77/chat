@@ -62,26 +62,27 @@ if (isset($_POST['enter'])) {
                 <input name="submitmsg" type="submit"  id="submitmsg" value="Send" />
             </form>
         </div>
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
         <script type="text/javascript">
             // jQuery Document
             $(document).ready(function() {
-                var id;
+                var id = 'undefined';
                 //If user submits the form
                 $("#submitmsg").click(function() {
                     var clientmsg = $("#usermsg").val();
-                    $("#usermsg").attr("value", "");
+                    $("#usermsg").val('');
+                    $("#usermsg").focus();
                     $.ajax({
                         type: 'POST',
                         url: 'post.php',
                         data: {text: clientmsg},
-                        cache: false,
+                        //cache: false,
                         async: false,
                         success: function(data) {
                             loadLog();
                         },
                         error: function(request, status, error) {
-                            $("#usermsg").attr("value", clientmsg);
+                            $("#usermsg").val(clientmsg);
                         },
                     });
                     return false;
@@ -89,13 +90,13 @@ if (isset($_POST['enter'])) {
 
                 //Load the file containing the chat log
                 function loadLog() {
-                    var oldscrollHeight = $("#chatbox").attr("scrollHeight") - 20;
+                    var oldscrollHeight = $("#chatbox")[0].scrollHeight;
                     $.ajax({
                         type: 'POST',
                         url: 'server.php',
                         data: {id: id},
                         dataType: 'json',
-                        cache: false,
+                        //cache: false,
                         async: false,
                         success: function(data) {
                             id = data.id;
@@ -110,9 +111,9 @@ if (isset($_POST['enter'])) {
                                         +data.data[k][1]+"</b>: "+data.data[k][2]+"<br></div>";
                             }
                             $("#chatbox").append(html); //Insert chat messages into the #chatbox div
-                            var newscrollHeight = $("#chatbox").attr("scrollHeight") - 20;
+                            var newscrollHeight = $("#chatbox")[0].scrollHeight;
                             if (newscrollHeight > oldscrollHeight) {
-                                $("#chatbox").animate({scrollTop: newscrollHeight}, 'normal'); //Autoscroll to bottom of div
+								$("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
                             }
                         },
                     });
