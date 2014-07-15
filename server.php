@@ -24,8 +24,9 @@ function vvv($var, & $result = null, $is_view = true)
 
 //$_POST['id'] = '1305177620-53c14f147c456';
 if (!isset($_POST['id'])) return;
+$isApc = extension_loaded('apc');
 $id = $_POST['id'];
-$cache = @unserialize(file_get_contents('./tmp/cache'));
+$cache = $isApc ? apc_fetch('chat') : @unserialize(file_get_contents('./tmp/cache'));
 $data = array();
 if ($id === 'undefined') {
     $id = empty($cache) ? 0 : $cache[0][0];

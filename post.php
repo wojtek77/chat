@@ -35,6 +35,8 @@ if (!isset($_SESSION['name'])) return;
 $text = isset($_POST['text']) ? $_POST['text'] : '';
 if ($text === '') return;
 
+$isApc = extension_loaded('apc');
+
 $setup = getSetup();
 $time = time();
 $date = date('Y-m-d', $time);
@@ -64,12 +66,20 @@ $data = array($id, $_SESSION['name'], stripslashes(htmlspecialchars($text)));
 fwrite($fh, implode('&', $data)."\n");
 
 // cache
-$cache = @file_get_contents($tmpFile);
-if ($cache === false) {
-    $cache = array();
+if ($isApc) {
+    $cache = apc_fetch('chat');
+    if ($cache === false) {
+        $cache = array();
+    }
 } else {
-    $cache = unserialize($cache);
+    $cache = @file_get_contents($tmpFile);
+    if ($cache === false) {
+        $cache = array();
+    } else {
+        $cache = unserialize($cache);
+    }    
 }
+
 array_unshift($cache, $data);
 
 // delete expired cache
@@ -82,7 +92,11 @@ foreach (array_reverse($cache,true) as $k => $e) {
     }
 }
 
-file_put_contents($tmpFile, serialize($cache));
+if ($isApc) {
+    apc_store('chat', $cache);
+} else {
+    file_put_contents($tmpFile, serialize($cache));
+}
 
 /* end semafore */
 flock($fh, LOCK_UN);
