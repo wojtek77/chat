@@ -1,5 +1,27 @@
 <?php
 
+function v($v, $czyscHtmlIExit = false) {
+	if ($czyscHtmlIExit) ob_end_clean();
+    echo '<pre>' . print_r($v, true) . '</pre>';
+	if ($czyscHtmlIExit) exit;
+}
+function vv($v, $czyscHtmlIExit = false) {
+	if ($czyscHtmlIExit) ob_end_clean();
+    echo '<pre>';
+	var_dump($v);
+	echo '</pre>';
+	if ($czyscHtmlIExit) exit;
+}
+function vvv($var, & $result = null, $is_view = true)
+{
+    if (is_array($var) || is_object($var)) foreach ($var as $key=> $value) vvv($value, $result[$key], false);
+    else $result = $var;
+
+    if ($is_view) v($result);
+}
+
+
+
 function loginForm() {
     echo'
 	<div id="loginform">
@@ -17,6 +39,17 @@ function getSetup($key = null) {
     $arr = parse_ini_file('setup.ini');
     return isset($key) ? $arr[$key] : $arr;
 }
+
+function deleteOldHistory() {
+    $expireHistory = getSetup('expire_history');
+    $expireDate = date('Y-m-d', strtotime("-$expireHistory day"));
+    foreach (glob('./history/*') as $f) {
+        if (basename($f) < $expireDate) {
+            unlink($f);
+        }
+    }
+}
+
 
 
 //-------------------------
@@ -46,12 +79,14 @@ if (isset($_POST['enter'])) {
     <?php
     if (!isset($_SESSION['name'])) {
         loginForm();
+        deleteOldHistory();
     } else {
         ?>
         <div id="wrapper">
             <div id="menu">
                 <p class="welcome">Welcome, <b><?php echo $_SESSION['name']; ?></b></p>
                 <p class="logout"><a id="exit" href="#">Exit Chat</a></p>
+                <p class="logout" style="margin-right: 1em;"><a target="_blank" href="history.php">History</a></p>
                 <div style="clear:both"></div>
             </div>	
             <div id="chatbox"><?php
