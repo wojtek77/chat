@@ -102,6 +102,8 @@ if (isset($_POST['enter'])) {
             // jQuery Document
             $(document).ready(function() {
                 var id = 'undefined';
+                var oldId = null;
+                var isRunLoadLog = false;
                 //If user submits the form
                 $("#submitmsg").click(function() {
                     var clientmsg = $("#usermsg").val();
@@ -112,9 +114,11 @@ if (isset($_POST['enter'])) {
                         url: 'post.php',
                         data: {text: clientmsg},
                         //cache: false,
-                        async: false,
+                        async: true,
                         success: function(data) {
-                            loadLog();
+                            if (!isRunLoadLog) {
+                                loadLog();
+                            }
                         },
                         error: function(request, status, error) {
                             $("#usermsg").val(clientmsg);
@@ -125,6 +129,7 @@ if (isset($_POST['enter'])) {
 
                 //Load the file containing the chat log
                 function loadLog() {
+                    isRunLoadLog = true;
                     var oldscrollHeight = $("#chatbox")[0].scrollHeight;
                     $.ajax({
                         type: 'POST',
@@ -132,24 +137,28 @@ if (isset($_POST['enter'])) {
                         data: {id: id},
                         dataType: 'json',
                         //cache: false,
-                        async: false,
+                        async: true,
                         success: function(data) {
                             id = data.id;
-                            var html = '';
-                            var date;
-                            for (var k in data.data.reverse()) {
-                                date = new Date(parseInt(data.data[k][0])*1000);
-                                date = date.toLocaleTimeString();
-                                date = date.replace(/([\d]+\D+[\d]{2})\D+[\d]{2}(.*)/, '$1$2');
-                                html = html
-                                        +"<div class='msgln'>("+date+") <b>"
-                                        +data.data[k][1]+"</b>: "+data.data[k][2]+"<br></div>";
+                            if (oldId !== id) {
+                                oldId = id;
+                                var html = '';
+                                var date;
+                                for (var k in data.data.reverse()) {
+                                        date = new Date(parseInt(data.data[k][0])*1000);
+                                        date = date.toLocaleTimeString();
+                                        date = date.replace(/([\d]+\D+[\d]{2})\D+[\d]{2}(.*)/, '$1$2');
+                                        html = html
+                                                +"<div class='msgln'>("+date+") <b>"
+                                                +data.data[k][1]+"</b>: "+data.data[k][2]+"<br></div>";
+                                }
+                                $("#chatbox").append(html); //Insert chat messages into the #chatbox div
+                                var newscrollHeight = $("#chatbox")[0].scrollHeight;
+                                if (newscrollHeight > oldscrollHeight) {
+                                    $("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
+                                }    
                             }
-                            $("#chatbox").append(html); //Insert chat messages into the #chatbox div
-                            var newscrollHeight = $("#chatbox")[0].scrollHeight;
-                            if (newscrollHeight > oldscrollHeight) {
-								$("#chatbox").scrollTop($("#chatbox")[0].scrollHeight);
-                            }
+                            isRunLoadLog = false;
                         },
                     });
                 }
