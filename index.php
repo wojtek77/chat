@@ -28,7 +28,7 @@ function loginForm() {
 	<form action="." method="post">
 		<p>Please enter your name to continue:</p>
 		<label for="name">Name:</label>
-		<input type="text" name="name" id="name" />
+		<input type="text" name="name" id="name" autofocus />
 		<input type="submit" name="enter" id="enter" value="Enter" />
 	</form>
 	</div>
@@ -94,7 +94,7 @@ if (isset($_POST['enter'])) {
         ?></div>
 
             <form name="message" action=".">
-                <input name="usermsg" type="text" id="usermsg" size="63" autocomplete="off" />
+                <input name="usermsg" type="text" id="usermsg" size="63" autocomplete="off" autofocus />
                 <input name="submitmsg" type="submit"  id="submitmsg" value="Send" />
             </form>
         </div>
