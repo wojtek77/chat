@@ -25,7 +25,7 @@ function vvv($var, & $result = null, $is_view = true)
 function loginForm() {
     echo'
 	<div id="loginform">
-	<form action="" method="post">
+	<form action="." method="post">
 		<p>Please enter your name to continue:</p>
 		<label for="name">Name:</label>
 		<input type="text" name="name" id="name" />
@@ -69,10 +69,11 @@ if (isset($_POST['enter'])) {
     }
 }
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <title>Chat - Customer Module</title>
+        <meta charset="UTF-8" />
         <link type="text/css" rel="stylesheet" href="style.css" />
     </head>
 
@@ -92,7 +93,7 @@ if (isset($_POST['enter'])) {
             <div id="chatbox"><?php
         ?></div>
 
-            <form name="message" action="">
+            <form name="message" action=".">
                 <input name="usermsg" type="text" id="usermsg" size="63" autocomplete="off" />
                 <input name="submitmsg" type="submit"  id="submitmsg" value="Send" />
             </form>
