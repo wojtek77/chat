@@ -11,28 +11,6 @@
 
 <?php
 
-function v($v, $czyscHtmlIExit = false) {
-	if ($czyscHtmlIExit) ob_end_clean();
-    echo '<pre>' . print_r($v, true) . '</pre>';
-	if ($czyscHtmlIExit) exit;
-}
-function vv($v, $czyscHtmlIExit = false) {
-	if ($czyscHtmlIExit) ob_end_clean();
-    echo '<pre>';
-	var_dump($v);
-	echo '</pre>';
-	if ($czyscHtmlIExit) exit;
-}
-function vvv($var, & $result = null, $is_view = true)
-{
-    if (is_array($var) || is_object($var)) foreach ($var as $key=> $value) vvv($value, $result[$key], false);
-    else $result = $var;
-
-    if ($is_view) v($result);
-}
-
-
-
 foreach (glob('./history/*') as $f) {
     
     echo '<h1>'.basename($f).'</h1>';
