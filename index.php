@@ -76,7 +76,7 @@ if (isset($_POST['enter'])) {
                 <input name="submitmsg" type="submit"  id="submitmsg" value="Send" />
             </form>
         </div>
-        <script type="text/javascript" src=jquery.min.js"></script>
+        <script type="text/javascript" src="jquery.min.js"></script>
         <script type="text/javascript">
             // jQuery Document
             $(document).ready(function() {
